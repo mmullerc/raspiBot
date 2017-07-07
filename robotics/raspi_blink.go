@@ -2,7 +2,9 @@ package robotics
 
 import (
 	"fmt"
+	"math/rand"
 	"net/http"
+	"strconv"
 	"time"
 
 	"raspibot/logger"
@@ -43,6 +45,25 @@ func Start(w http.ResponseWriter, req *http.Request) {
 func Stop(w http.ResponseWriter, req *http.Request) {
 	logger.Print("Stoping Motor!", w)
 	manageMotor(STOP);
+}
+
+func DriveForward(w http.ResponseWriter, req *http.Request) {
+	logger.Print("Drive Forward!", w)
+	t, err := strconv.ParseInt(req.URL.Query().Get("time"), 10, 64)
+
+	if err != nil {
+		t = int64(rand.Intn(5))
+	} 
+
+	logger.Print(fmt.Sprintf("%s%d", "Time: ", t), w)
+
+	for a := 0; a < 10; a++ {
+      time.Sleep(2 * time.Second)
+	  logger.Print(fmt.Sprintf("%s%d", "Lap #", a), w)
+	  go manageMotor(START)
+	  time.Sleep(time.Duration(rand.Int31n(int32(t))) * time.Second)
+	  go manageMotor(STOP)
+   	}
 }
 
 func manageMotor(action int) {

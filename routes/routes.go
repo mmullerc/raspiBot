@@ -40,4 +40,10 @@ var Routes = AllRoutes{
 		"/stopMotor",
 		robotics.Stop,
 	},
+	Route{
+		"driveForward",
+		"GET",
+		"/driveForward",
+		robotics.DriveForward,
+	},
 }
