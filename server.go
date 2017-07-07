@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
-	"raspberrypi/router"
+	"raspibot/router"
 )
 
 func main() {

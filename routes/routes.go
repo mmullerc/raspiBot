@@ -2,8 +2,8 @@ package routes
 
 import (
 	"net/http"
-	"raspberrypi/controllers"
-	"raspberrypi/robotics"
+	"raspibot/controllers"
+	"raspibot/robotics"
 )
 
 type Route struct {

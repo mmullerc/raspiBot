@@ -3,8 +3,8 @@ package router
 import (
 	"net/http"
 
-	"raspberrypi/logger"
-	"raspberrypi/routes"
+	"raspibot/logger"
+	"raspibot/routes"
 
 	"github.com/gorilla/mux"
 )
