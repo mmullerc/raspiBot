@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -20,4 +21,13 @@ func Logger(inner http.Handler, name string) http.Handler {
 			time.Since(start),
 		)
 	})
+}
+
+func Print(message string, w http.ResponseWriter) {
+	start := time.Now()
+
+	fmt.Printf("%s - %+v\n",time.Since(start), message)
+	if w != nil {
+		fmt.Fprint(w, "%s - %+v\n",time.Since(start), message)
+	}
 }

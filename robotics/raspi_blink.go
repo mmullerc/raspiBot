@@ -5,10 +5,15 @@ import (
 	"net/http"
 	"time"
 
+	"raspibot/logger"
+
 	"gobot.io/x/gobot"
 	"gobot.io/x/gobot/drivers/gpio"
 	"gobot.io/x/gobot/platforms/raspi"
 )
+
+var STOP 			= 0
+var START 			= 1
 
 func Blinking(w http.ResponseWriter, req *http.Request) {
 
@@ -31,37 +36,32 @@ func Blinking(w http.ResponseWriter, req *http.Request) {
 }
 
 func Start(w http.ResponseWriter, req *http.Request) {
-
-	fmt.Fprint(w, "Starting Motor!\n")
-	r := raspi.NewAdaptor()
-	motor := gpio.NewLedDriver(r, "7")
-
-	startMotor := func() {
-		motor.On()
-	}
-
-	robot := gobot.NewRobot("ServoMotors",
-		[]gobot.Connection{r},
-		[]gobot.Device{motor},
-		startMotor,
-	)
-	robot.Start()
+	logger.Print("Starting Motor!", w)
+	manageMotor(START);
 }
 
 func Stop(w http.ResponseWriter, req *http.Request) {
+	logger.Print("Stoping Motor!", w)
+	manageMotor(STOP);
+}
 
-	fmt.Fprint(w, "Stoping Motor!\n")
+func manageMotor(action int) {
+	logger.Print("Manage motor function", nil)
 	r := raspi.NewAdaptor()
 	motor := gpio.NewLedDriver(r, "7")
 
-	stopMotor := func() {
-		motor.Off()
+	actionMotor := func() {
+		if action == STOP {
+			motor.Off()
+		} else if action == START {
+			motor.On()
+		}
 	}
 
 	robot := gobot.NewRobot("ServoMotors",
 		[]gobot.Connection{r},
 		[]gobot.Device{motor},
-		stopMotor,
+		actionMotor,
 	)
 	robot.Start()
 }
