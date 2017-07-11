@@ -8,39 +8,39 @@ import (
   "gopkg.in/mgo.v2/bson"
 )
 
-type State struct {
-  Component string
+type Component struct {
+  Name string
   State string
   Direction string
   Speed string 
 }
 
-func GetStateByComponent(w http.ResponseWriter, component string) {
+func GetStateByComponent(w http.ResponseWriter, name string) {
   session, err := mgo.Dial("10.28.6.16")
   if err != nil {
     panic(err)
   }
   defer session.Close()
-  c := session.DB("raspiBot").C("state")
-  result := State{}
-  err = c.Find(bson.M{"component": component}).One(&result)
+  c := session.DB("raspiBot").C("components")
+  result := Component{}
+  err = c.Find(bson.M{"name": name}).One(&result)
   if err != nil {
     log.Fatal(err)
   }
 
-  fmt.Fprint(w, result.Component, ": ", result.State, ",", result.Direction, ",", result.Speed, "\n")
+  fmt.Fprint(w, result.Name, ": ", result.State, ",", result.Direction, ",", result.Speed, "\n")
 }
 
-func InsertState(component string, state string, direction string, speed string) {
-  session, err := mgo.Dial("10.28.6.16")
-  if err != nil {
-    panic(err)
-  }
-  defer session.Close()
+// func InsertState(component string, state string, direction string, speed string) {
+//   session, err := mgo.Dial("10.28.6.16")
+//   if err != nil {
+//     panic(err)
+//   }
+//   defer session.Close()
 
-  c := session.DB("raspiBot").C("state")
-  err = c.Insert(&State{component, state, direction, speed})
-  if err != nil {
-    log.Fatal(err)
-  }
-}
+//   c := session.DB("raspiBot").C("state")
+//   err = c.Insert(&Component{component, state, direction, speed})
+//   if err != nil {
+//     log.Fatal(err)
+//   }
+// }
