@@ -8,8 +8,8 @@ import (
 
 func Index(w http.ResponseWriter, r *http.Request) {
 	//Testing DB
-	//db.InsertState("motor", "on", "left", "fast")
-	db.GetStateByComponent(w, "motor")
+	db.InsertState("motors", "on", "left", "fast")
+	db.GetStateByComponent(w, "motors")
 
 	fmt.Fprint(w, "Welcome!\n")
 }
