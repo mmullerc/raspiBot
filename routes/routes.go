@@ -23,10 +23,16 @@ var Routes = AllRoutes{
 		controllers.Index,
 	},
 	Route{
-		"startLed",
+		"startLeds",
 		"GET",
-		"/startLed",
-		robotics.Blinking,
+		"/turnLedsOn",
+		robotics.TurnLedsOn,
+	},
+	Route{
+		"stopLeds",
+		"GET",
+		"/turnLedsOff",
+		robotics.TurnLedsOff,
 	},
 	Route{
 		"startMotor",
