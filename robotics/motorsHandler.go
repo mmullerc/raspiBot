@@ -2,51 +2,89 @@ package robotics
 
 import (
 	"net/http"
-	"strconv"
+	"time"
 
 	"gobot.io/x/gobot/platforms/firmata"
-	"gobot.io/x/gobot/platforms/firmata/client"
 )
 
-//type Adapdtor raspi.Adaptor
+//PIN numbers
+var STBY = "7"
 
-type firmataAdaptor firmata.Adaptor
+//Speed for motor A & B
+var PWMA = "19"
+var PWMB = "21"
+
+//Motor A inputs
+var AIN1 = "16"
+var AIN2 = "12"
+
+//Motor B inputs
+var BIN1 = "32"
+var BIN2 = "22"
+
+var adaptor = firmata.NewAdaptor()
 
 func SetUpMotors(w http.ResponseWriter, req *http.Request) {
 	//Entrypoint
+	//adaptor := firmata.NewAdaptor()
+	speed := byte(128)
+	var direction = "forward"
+
+	if direction == "forward" {
+		moveForward("a", speed)
+		moveForward("b", speed)
+		time.Sleep(time.Second * 5)
+		stop()
+	}
+
+	if direction == "backward" {
+		moveBackward("a", speed)
+		moveBackward("b", speed)
+	}
+
+	if direction == "right" {
+		moveForward("a", speed)
+		moveBackward("b", speed)
+	}
+
+	if direction == "left" {
+		moveBackward("a", speed)
+		moveForward("b", speed)
+	}
 }
 
-// PwmWrite writes the 0-254 value to the specified pin
-func (f *firmataAdaptor) PwmWrite(pin string, level byte) (err error) {
-	p, err := strconv.Atoi(pin)
-	if err != nil {
-		return err
+func moveForward(motor string, speed byte) {
+	move(speed)
+	if motor == "a" {
+		adaptor.DigitalWrite(AIN1, 1)
+		adaptor.DigitalWrite(AIN2, 0)
 	}
 
-	if f.Board.Pins()[p].Mode != client.Pwm {
-		err = f.Board.SetPinMode(p, client.Pwm)
-		if err != nil {
-			return err
-		}
+	if motor == "b" {
+		adaptor.DigitalWrite(BIN1, 1)
+		adaptor.DigitalWrite(BIN2, 0)
 	}
-	err = f.Board.AnalogWrite(p, int(level))
-	return
 }
 
-// DigitalWrite writes a value to the pin. Acceptable values are 1 or 0.
-func (f *firmataAdaptor) DigitalWrite(pin string, level byte) (err error) {
-	p, err := strconv.Atoi(pin)
-	if err != nil {
-		return
+func moveBackward(motor string, speed byte) {
+	move(speed)
+	if motor == "a" {
+		adaptor.DigitalWrite(AIN1, 0)
+		adaptor.DigitalWrite(AIN2, 1)
 	}
 
-	if f.Board.Pins()[p].Mode != client.Output {
-		err = f.Board.SetPinMode(p, client.Output)
-		if err != nil {
-			return
-		}
+	if motor == "b" {
+		adaptor.DigitalWrite(BIN1, 0)
+		adaptor.DigitalWrite(BIN2, 1)
 	}
+}
 
-	err = f.Board.DigitalWrite(p, int(level))
-	return
+func move(speed byte) {
+	adaptor.DigitalWrite(STBY, 1)
+	adaptor.PwmWrite(PWMA, speed)
+	adaptor.PwmWrite(PWMB, speed)
+}
+
+func stop() {
+	adaptor.DigitalWrite(STBY, 0)
 }
