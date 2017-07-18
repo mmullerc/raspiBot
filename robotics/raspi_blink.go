@@ -14,37 +14,89 @@ import (
 	"gobot.io/x/gobot/platforms/raspi"
 )
 
-var STOP 			= 0
-var START 			= 1
+var STOP = 0
+var START = 1
 
-func Blinking(w http.ResponseWriter, req *http.Request) {
+func TurnLedsOn(w http.ResponseWriter, req *http.Request) {
 
-	fmt.Fprint(w, "Starting LED!\n")
+	fmt.Fprint(w, "Starting Leds on Multiple Pins!\n")
 	r := raspi.NewAdaptor()
-	led := gpio.NewLedDriver(r, "7")
+	ledPin7 := gpio.NewLedDriver(r, "7")   // GPIO-4
+	ledPin20 := gpio.NewLedDriver(r, "19") // SPIMOSI
+	ledPin21 := gpio.NewLedDriver(r, "21") // SPIMISO
+	ledPin16 := gpio.NewLedDriver(r, "16") // GPIO-23
 
-	work := func() {
-		gobot.Every(1*time.Second, func() {
-			led.Toggle()
-		})
+	ledPin12 := gpio.NewLedDriver(r, "12") // GPIO-18
+	ledPin32 := gpio.NewLedDriver(r, "32") // GPIO-12
+	ledPin22 := gpio.NewLedDriver(r, "22") // GPIO-25
+
+	blinkingTest := func() {
+		ledPin7.On()
+		ledPin20.On()
+		ledPin21.On()
+		ledPin16.On()
+		ledPin12.On()
+		ledPin32.On()
+		ledPin22.On()
 	}
-
-	robot := gobot.NewRobot("blinkBot",
+	blinkBot := gobot.NewRobot("blinkBot",
 		[]gobot.Connection{r},
-		[]gobot.Device{led},
-		work,
+		[]gobot.Device{ledPin7},
+		[]gobot.Device{ledPin20},
+		[]gobot.Device{ledPin21},
+		[]gobot.Device{ledPin16},
+		[]gobot.Device{ledPin12},
+		[]gobot.Device{ledPin32},
+		[]gobot.Device{ledPin22},
+		blinkingTest,
 	)
-	robot.Start()
+	blinkBot.Start()
+}
+
+func TurnLedsOff(w http.ResponseWriter, req *http.Request) {
+
+	fmt.Fprint(w, "Starting Leds on Multiple Pins!\n")
+	r := raspi.NewAdaptor()
+	ledPin7 := gpio.NewLedDriver(r, "7")
+	ledPin20 := gpio.NewLedDriver(r, "19")
+	ledPin21 := gpio.NewLedDriver(r, "21")
+	ledPin16 := gpio.NewLedDriver(r, "16")
+
+	ledPin12 := gpio.NewLedDriver(r, "12")
+	ledPin32 := gpio.NewLedDriver(r, "32")
+	ledPin22 := gpio.NewLedDriver(r, "22")
+
+	blinkingTest := func() {
+		ledPin7.Off()
+		ledPin20.Off()
+		ledPin21.Off()
+		ledPin16.Off()
+		ledPin12.Off()
+		ledPin32.Off()
+		ledPin22.Off()
+	}
+	blinkBot := gobot.NewRobot("blinkBot",
+		[]gobot.Connection{r},
+		[]gobot.Device{ledPin7},
+		[]gobot.Device{ledPin20},
+		[]gobot.Device{ledPin21},
+		[]gobot.Device{ledPin16},
+		[]gobot.Device{ledPin12},
+		[]gobot.Device{ledPin32},
+		[]gobot.Device{ledPin22},
+		blinkingTest,
+	)
+	blinkBot.Start()
 }
 
 func Start(w http.ResponseWriter, req *http.Request) {
 	logger.Print("Starting Motor!", w)
-	manageMotor(START);
+	manageMotor(START)
 }
 
 func Stop(w http.ResponseWriter, req *http.Request) {
 	logger.Print("Stoping Motor!", w)
-	manageMotor(STOP);
+	manageMotor(STOP)
 }
 
 func DriveForward(w http.ResponseWriter, req *http.Request) {
@@ -53,17 +105,17 @@ func DriveForward(w http.ResponseWriter, req *http.Request) {
 
 	if err != nil {
 		t = int64(rand.Intn(5))
-	} 
+	}
 
 	logger.Print(fmt.Sprintf("%s%d", "Time: ", t), w)
 
 	for a := 0; a < 10; a++ {
-      time.Sleep(2 * time.Second)
-	  logger.Print(fmt.Sprintf("%s%d", "Lap #", a), w)
-	  go manageMotor(START)
-	  time.Sleep(time.Duration(rand.Int31n(int32(t))) * time.Second)
-	  go manageMotor(STOP)
-   	}
+		time.Sleep(2 * time.Second)
+		logger.Print(fmt.Sprintf("%s%d", "Lap #", a), w)
+		go manageMotor(START)
+		time.Sleep(time.Duration(rand.Int31n(int32(t))) * time.Second)
+		go manageMotor(STOP)
+	}
 }
 
 func manageMotor(action int) {
