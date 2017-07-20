@@ -4,30 +4,30 @@ import (
 	"net/http"
 	"time"
 
-	"gobot.io/x/gobot/platforms/firmata"
+	"gobot.io/x/gobot/platforms/raspi"
 )
 
 //PIN numbers
-var STBY = "7"
+var STBY = "7" // GPIO-4
 
 //Speed for motor A & B
-var PWMA = "19"
-var PWMB = "21"
+var PWMA = "35" // GPIO19
+var PWMB = "37" // GPIO26
 
 //Motor A inputs
-var AIN1 = "16"
-var AIN2 = "12"
+var AIN1 = "16" // GPIO-23
+var AIN2 = "12" // GPIO-18
 
 //Motor B inputs
-var BIN1 = "32"
-var BIN2 = "22"
+var BIN1 = "32" // GPIO-12
+var BIN2 = "22" // GPIO-25
 
-var adaptor = firmata.NewAdaptor()
+var r = raspi.NewAdaptor()
 
 func SetUpMotors(w http.ResponseWriter, req *http.Request) {
 	//Entrypoint
-	//adaptor := firmata.NewAdaptor()
-	speed := byte(128)
+
+	speed := byte(254)
 	var direction = "forward"
 
 	if direction == "forward" {
@@ -56,35 +56,35 @@ func SetUpMotors(w http.ResponseWriter, req *http.Request) {
 func moveForward(motor string, speed byte) {
 	move(speed)
 	if motor == "a" {
-		adaptor.DigitalWrite(AIN1, 1)
-		adaptor.DigitalWrite(AIN2, 0)
+		r.DigitalWrite(AIN1, 1)
+		r.DigitalWrite(AIN2, 0)
 	}
 
 	if motor == "b" {
-		adaptor.DigitalWrite(BIN1, 1)
-		adaptor.DigitalWrite(BIN2, 0)
+		r.DigitalWrite(BIN1, 1)
+		r.DigitalWrite(BIN2, 0)
 	}
 }
 
 func moveBackward(motor string, speed byte) {
 	move(speed)
 	if motor == "a" {
-		adaptor.DigitalWrite(AIN1, 0)
-		adaptor.DigitalWrite(AIN2, 1)
+		r.DigitalWrite(AIN1, 0)
+		r.DigitalWrite(AIN2, 1)
 	}
 
 	if motor == "b" {
-		adaptor.DigitalWrite(BIN1, 0)
-		adaptor.DigitalWrite(BIN2, 1)
+		r.DigitalWrite(BIN1, 0)
+		r.DigitalWrite(BIN2, 1)
 	}
 }
 
 func move(speed byte) {
-	adaptor.DigitalWrite(STBY, 1)
-	adaptor.PwmWrite(PWMA, speed)
-	adaptor.PwmWrite(PWMB, speed)
+	r.DigitalWrite(STBY, 1)
+	r.PwmWrite(PWMA, speed)
+	r.PwmWrite(PWMB, speed)
 }
 
 func stop() {
-	adaptor.DigitalWrite(STBY, 0)
+	r.DigitalWrite(STBY, 0)
 }
