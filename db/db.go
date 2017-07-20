@@ -1,7 +1,6 @@
 package db
 
 import (
-  "fmt"
   "log"
   "net/http"
   "gopkg.in/mgo.v2"
@@ -15,7 +14,7 @@ type Component struct {
   Speed string 
 }
 
-func GetStateByComponent(w http.ResponseWriter, name string) {
+func GetStateByComponent(w http.ResponseWriter, name string) Component{
   session, err := mgo.Dial("10.28.6.16")
   if err != nil {
     panic(err)
@@ -28,7 +27,7 @@ func GetStateByComponent(w http.ResponseWriter, name string) {
     log.Fatal(err)
   }
 
-  fmt.Fprint(w, result.Name, ": ", result.State, ",", result.Direction, ",", result.Speed, "\n")
+  return result
 }
 
 // func InsertState(component string, state string, direction string, speed string) {

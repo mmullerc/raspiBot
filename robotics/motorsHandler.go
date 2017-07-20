@@ -3,6 +3,8 @@ package robotics
 import (
 	"net/http"
 	"time"
+	"fmt"
+	"raspibot/db"
 
 	"gobot.io/x/gobot/platforms/raspi"
 )
@@ -11,45 +13,55 @@ import (
 var STBY = "7" // GPIO-4
 
 //Speed for motor A & B
-var PWMA = "35" // GPIO19
-var PWMB = "37" // GPIO26
+var PWMA = "33" // GPIO12
+var PWMB = "12" // GPIO18
 
 //Motor A inputs
-var AIN1 = "16" // GPIO-23
-var AIN2 = "12" // GPIO-18
+var AIN1 = "38" // GPIO19
+var AIN2 = "40" // GPIO12
 
 //Motor B inputs
-var BIN1 = "32" // GPIO-12
-var BIN2 = "22" // GPIO-25
+var BIN1 = "35" // GPIO16
+var BIN2 = "37" // GPIO20
 
 var r = raspi.NewAdaptor()
 
 func SetUpMotors(w http.ResponseWriter, req *http.Request) {
 	//Entrypoint
+	motor := db.GetStateByComponent(w, "motor")
+	fmt.Fprint(w, motor.Name, ": ", motor.State, ",", motor.Direction, ",", motor.Speed, "\n")
 
-	speed := byte(254)
-	var direction = "forward"
+	speed := byte(255)
+	if motor.Speed == "slow" {
+		speed = byte(128)
+	}
 
-	if direction == "forward" {
+	if motor.Direction == "forward" {
 		moveForward("a", speed)
 		moveForward("b", speed)
 		time.Sleep(time.Second * 5)
 		stop()
 	}
 
-	if direction == "backward" {
+	if motor.Direction == "backward" {
 		moveBackward("a", speed)
 		moveBackward("b", speed)
+		time.Sleep(time.Second * 5)
+		stop()
 	}
 
-	if direction == "right" {
+	if motor.Direction == "right" {
 		moveForward("a", speed)
 		moveBackward("b", speed)
+		time.Sleep(time.Second * 1)
+		stop()
 	}
 
-	if direction == "left" {
+	if motor.Direction == "left" {
 		moveBackward("a", speed)
 		moveForward("b", speed)
+		time.Sleep(time.Second * 1)
+		stop()
 	}
 }
 
