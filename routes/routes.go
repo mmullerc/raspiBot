@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"raspibot/controllers"
 	"raspibot/robotics"
+	"raspibot/ultrasonic"
 )
 
 type Route struct {
@@ -57,5 +58,11 @@ var Routes = AllRoutes{
 		"GET",
 		"/setUpMotors",
 		robotics.SetUpMotors,
+	},
+	Route{
+		"setUpUltrasonic",
+		"GET",
+		"/startUltrasonic",
+		ultrasonic.UltrasonicSensor,
 	},
 }
