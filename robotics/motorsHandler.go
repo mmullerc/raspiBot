@@ -9,20 +9,15 @@ import (
 	"gobot.io/x/gobot/platforms/raspi"
 )
 
-//PIN numbers
-var STBY = "7" // GPIO-4
-
-//Speed for motor A & B
-var PWMA = "33" // GPIO12
-var PWMB = "12" // GPIO18
-
-//Motor A inputs
-var AIN1 = "38" // GPIO19
-var AIN2 = "40" // GPIO12
-
-//Motor B inputs
-var BIN1 = "35" // GPIO16
-var BIN2 = "37" // GPIO20
+const (
+	STBY = "7" //GPIO-4
+	PWMA = "33" //GPIO-12
+	PWMB = "12" //GPIO-18
+	AIN1 = "38" //GPIO-19
+	AIN2 = "40" //GPIO-12
+	BIN1 = "35" //GPIO-16
+	BIN2 = "37" //GPIO-20
+)
 
 var r = raspi.NewAdaptor()
 
