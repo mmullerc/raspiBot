@@ -1,12 +1,8 @@
 package robotics
 
 import (
-	"fmt"
-	"net/http"
-	"raspibot/db"
-	"time"
-
 	"gobot.io/x/gobot/platforms/raspi"
+	"time"
 )
 
 const (
@@ -19,129 +15,63 @@ const (
 	BIN1 = "35" //GPIO-16
 	BIN2 = "37" //GPIO-20
 
-	//MOTORS GROUP
-	MOTOR_LEFT  = "a"
-	MOTOR_RIGHT = "b"
-
 	//TURN ANGLES
-	angle45  = 500
-	angle90  = 700
-	angle180 = 1300
+	// angle45  = 500
+	// angle90  = 700
+	// angle180 = 1300
 )
 
-var (
-	r     = raspi.NewAdaptor()
-	speed = byte(255)
-	motor = db.GetStateByComponent("motor")
-)
+var r raspi.Adaptor
 
-func SetUpMotors(w http.ResponseWriter, req *http.Request) {
-	//Entrypoint
-	fmt.Fprint(w, motor.Name, ": ", motor.State, ",", motor.Direction, ",", motor.Speed, "\n")
+func StartMotors(speed byte, adaptor *raspi.Adaptor) {
 
-	if motor.Speed == "slow" {
-		speed = byte(128)
-	}
+	r = adaptor
 
-	if motor.Direction == "forward" {
-		moveForward(MOTOR_LEFT, speed)
-		moveForward(MOTOR_RIGHT, speed)
-		time.Sleep(time.Second * 5)
-		stop()
-	}
+	adaptor.DigitalWrite(STBY, 1)
+	adaptor.PwmWrite(PWMA, speed)
+	adaptor.PwmWrite(PWMB, speed)
 
-	if motor.Direction == "backward" {
-		moveBackward(MOTOR_LEFT, speed)
-		moveBackward(MOTOR_RIGHT, speed)
-		time.Sleep(time.Second * 5)
-		stop()
-	}
-
-	if motor.Direction == "right" {
-		moveForward(MOTOR_LEFT, speed)
-		moveBackward(MOTOR_RIGHT, speed)
-		time.Sleep(time.Second * 1)
-		stop()
-	}
-
-	if motor.Direction == "left" {
-		moveBackward(MOTOR_LEFT, speed)
-		moveForward(MOTOR_RIGHT, speed)
-		time.Sleep(time.Second * 1)
-		stop()
-	}
+	MoveForward()
 }
 
-func moveForward(motor string, speed byte) {
-	move(speed)
-	if motor == MOTOR_LEFT {
-		r.DigitalWrite(AIN1, 1)
-		r.DigitalWrite(AIN2, 0)
-	}
-
-	if motor == MOTOR_RIGHT {
-		r.DigitalWrite(BIN1, 1)
-		r.DigitalWrite(BIN2, 0)
-	}
+func MoveForward() {
+	moveMotors(1, 0, 1, 0)
 }
 
-func moveBackward(motor string, speed byte) {
-	move(speed)
-	if motor == MOTOR_LEFT {
-		r.DigitalWrite(AIN1, 0)
-		r.DigitalWrite(AIN2, 1)
-	}
-
-	if motor == MOTOR_RIGHT {
-		r.DigitalWrite(BIN1, 0)
-		r.DigitalWrite(BIN2, 1)
-	}
+func MoveBackward() {
+	moveMotors(0, 1, 0, 1)
 }
 
-func move(speed byte) {
-	r.DigitalWrite(STBY, 1)
-	r.PwmWrite(PWMA, speed)
-	r.PwmWrite(PWMB, speed)
+func MoveRight() {
+	moveMotors(1, 0, 0, 1)
 }
 
-func stop() {
-	r.DigitalWrite(STBY, 0)
-	time.Sleep(time.Second * 1)
+func MoveLeft() {
+	moveMotors(0, 1, 1, 0)
 }
 
-func turn(turns int) {
-	if turns == 1 {
-		turnRight(angle90)
-		fmt.Printf("Angle 1: %v\n", angle90)
-	} else if turns == 2 {
-		turnLeft(angle180)
-		fmt.Printf("Angle 2: %v\n", angle180)
+func turn(direction byte, angle time.Duration) {
+	if direction == 0 {
+		MoveRight()
 	} else {
-		turnLeft(angle90)
-		fmt.Printf("Angle 180: %v\n", angle180)
+		MoveLeft();
 	}
+	time.Sleep(time.Millisecond * angle)
+	MoveForward()
 }
 
-func turnRight(timeToRun time.Duration) {
-	moveForward(MOTOR_LEFT, speed)
-	moveBackward(MOTOR_RIGHT, speed)
-	time.Sleep(time.Millisecond * timeToRun)
+func KillMotors() {
+	moveMotors(0, 0, 0, 0)
+	r.DigitalWrite(STBY, 0)
 }
 
-func turnLeft(timeToRun time.Duration) {
-	moveForward(MOTOR_RIGHT, speed)
-	moveBackward(MOTOR_LEFT, speed)
-	time.Sleep(time.Millisecond * timeToRun)
-}
+func moveMotors(ain1 byte, ain2 byte, bin1 byte, bin2 byte) {
 
-func moveAllMotorsForward() {
-	moveForward(MOTOR_LEFT, speed)
-	moveForward(MOTOR_RIGHT, speed)
-}
+	// LEFT MOTOR
+	r.DigitalWrite(AIN1, ain1)
+	r.DigitalWrite(AIN2, ain2)
 
-func KillMotors(w http.ResponseWriter, req *http.Request) {
-	r.DigitalWrite(AIN1, 0)
-	r.DigitalWrite(AIN2, 0)
-	r.DigitalWrite(BIN1, 0)
-	r.DigitalWrite(BIN2, 0)
+	// RIGHT MOTOR
+	r.DigitalWrite(BIN1, bin1)
+	r.DigitalWrite(BIN2, bin2)
 }

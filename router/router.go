@@ -1,12 +1,10 @@
 package router
 
 import (
+	"github.com/gorilla/mux"
 	"net/http"
-
 	"raspibot/logger"
 	"raspibot/routes"
-
-	"github.com/gorilla/mux"
 )
 
 func NewRouter() *mux.Router {
