@@ -25,7 +25,9 @@ var r raspi.Adaptor
 
 func StartMotors(speed byte, adaptor *raspi.Adaptor) {
 
-	r = adaptor
+	//board := raspi.NewAdaptor()
+	//board.DigitalWrite(STBY, 1)
+	//r = adaptor
 
 	adaptor.DigitalWrite(STBY, 1)
 	adaptor.PwmWrite(PWMA, speed)
