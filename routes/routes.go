@@ -23,10 +23,16 @@ var Routes = AllRoutes{
 		controllers.Index,
 	},
 	Route{
-		"startLed",
+		"startLeds",
 		"GET",
-		"/startLed",
-		robotics.Blinking,
+		"/turnLedsOn",
+		robotics.TurnLedsOn,
+	},
+	Route{
+		"stopLeds",
+		"GET",
+		"/turnLedsOff",
+		robotics.TurnLedsOff,
 	},
 	Route{
 		"startMotor",
@@ -39,5 +45,29 @@ var Routes = AllRoutes{
 		"GET",
 		"/stopMotor",
 		robotics.Stop,
+	},
+	Route{
+		"driveForward",
+		"GET",
+		"/driveForward",
+		robotics.DriveForward,
+	},
+	Route{
+		"setUpMotors",
+		"GET",
+		"/setUpMotors",
+		robotics.SetUpMotors,
+	},
+	Route{
+		"setUpUltrasonic",
+		"GET",
+		"/startUltrasonic",
+		robotics.UltrasonicSensor,
+	},
+	Route{
+		"killMotors",
+		"GET",
+		"/killMotors",
+		robotics.KillMotors,
 	},
 }
