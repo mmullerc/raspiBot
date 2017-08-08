@@ -1,12 +1,14 @@
 package robotics
 
 import (
-	"gobot.io/x/gobot"
+	"fmt"
 	"net/http"
 	"raspibot/db"
-    "time" 
-    "gobot.io/x/gobot/platforms/raspi"
-    "fmt"
+	"raspibot/utilities"
+	"time"
+
+	"gobot.io/x/gobot"
+	"gobot.io/x/gobot/platforms/raspi"
 )
 
 var adaptor = raspi.NewAdaptor()
@@ -14,52 +16,58 @@ var robot *gobot.Robot
 var ticker *time.Ticker
 
 func TurnOnCar(w http.ResponseWriter, req *http.Request) {
-    fmt.Println("Turn on car")
+	fmt.Fprint(w, "Starting car!\n")
 	//StartMotors(byte(255), adaptor)
-    db.StartCar()
-    if !robot.Running() {
-        robot = gobot.NewRobot("makeyBot",
-            []gobot.Connection{adaptor},
-            StartListening,
-        )
-	    robot.Start()
-    }
+	db.StartCar()
+	fmt.Printf("%+v\n", robot)
+	if robot != nil {
+		if !robot.Running() {
+			robot = gobot.NewRobot("raspiBot",
+				[]gobot.Connection{adaptor},
+				StartListening,
+			)
+			robot.Start()
+		}
+	}
 }
 
 func StopCar(w http.ResponseWriter, req *http.Request) {
-    db.StopCar()
+	fmt.Fprint(w, "Stoping car!\n")
+	db.StopCar()
 }
 
 func Move(w http.ResponseWriter, req *http.Request) {
-    StartMotors(byte(255), adaptor)
+	StartMotors(byte(255), adaptor)
 }
 
 func StartListening() {
-    ticker = gobot.Every(100*time.Millisecond, func() {
+	ticker = gobot.Every(100*time.Millisecond, func() {
 
-        motor := db.GetStateByComponent("motor")
+		motor, err := db.GetStateByComponent("motor")
+		utilities.CheckForStringErr(err)
 
-        //Check motor
-        if motor.State == "on" {
-            println("Starting probing ")
+		//Check motor
+		if motor.State == "on" {
+			println("Starting motors!")
 
-            distance := GetDistance()
+			distance := GetDistance()
 
-            if distance < 50 {
-                MoveRight()
-            } else {
-                MoveForward()
-            }
-        }
+			if distance < 50 {
+				MoveRight()
+			} else {
+				MoveForward()
+			}
+		}
 
-        //Check general car status
-        car := db.GetStateByComponent("car")
-        if car.State == "off" {
-            stopListening()
-        }
-    })
+		//Check general car status
+		car, err := db.GetStateByComponent("car")
+		utilities.CheckForStringErr(err)
+		if car.State == "off" {
+			stopListening()
+		}
+	})
 }
 
 func stopListening() {
-    ticker.Stop()
+	ticker.Stop()
 }

@@ -2,8 +2,15 @@ package db
 
 import (
 	"log"
+	"raspibot/utilities"
+
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+)
+
+//Database session
+var (
+	mgoSession *mgo.Session
 )
 
 type Component struct {
@@ -13,67 +20,120 @@ type Component struct {
 	Speed     string
 }
 
-func GetStateByComponent(name string) Component {
-	session, err := mgo.Dial("10.28.6.16")
-	if err != nil {
-		panic(err)
+const (
+	MONGO_CONN_STR        = "10.28.6.16"
+	DATABASE_NAME         = "raspiBot"
+	COMPONENTS_COLLECTION = "components"
+)
+
+//Retruns a NEW session, but reuses the same socket as the original session
+func getMongoSession() *mgo.Session {
+	if mgoSession == nil {
+		var err error
+		mgoSession, err = mgo.Dial(MONGO_CONN_STR)
+		if err != nil {
+			log.Fatal("Failed to start MongoDB session")
+		}
 	}
+	return mgoSession.Clone()
+}
+
+//High order function
+//Handles session.close when done
+func queryWithComponentsCollection(fn func(*mgo.Collection) error) error {
+	session := getMongoSession()
 	defer session.Close()
-	c := session.DB("raspiBot").C("components")
-	result := Component{}
-	err = c.Find(bson.M{"name": name}).One(&result)
+	c := session.DB(DATABASE_NAME).C(COMPONENTS_COLLECTION) // This can be parameterized later so it's more dynamic
+	return fn(c)
+}
+
+//Retrieves a component by it's name
+func GetStateByComponent(name string) (searchResults Component, searchErr string) {
+	searchErr = ""
+	searchResults = Component{}
+
+	//Query to run
+	query := func(c *mgo.Collection) error {
+		fn := c.Find(bson.M{"name": name}).One(&searchResults)
+		return fn
+	}
+	//calls High order function with query
+	search := func() error {
+		return queryWithComponentsCollection(query)
+	}
+
+	err := search()
 	if err != nil {
-		log.Fatal(err)
+		searchErr = "Database Error"
+	}
+	return
+}
+
+//Inserts a new component in the database
+func insertState(component string, state string, direction string, speed string) string {
+	searchErr := ""
+	query := func(c *mgo.Collection) error {
+		fn := c.Insert(&Component{component, state, direction, speed})
+		return fn
 	}
 
-	return result
+	search := func() error {
+		return queryWithComponentsCollection(query)
+	}
+
+	err := search()
+	if err != nil {
+		searchErr = "Database Error"
+	}
+	return searchErr
 }
 
-func openSession() *Collection {
-  session, err := mgo.Dial("10.28.6.16")
-  if err != nil {
-    panic(err)
-  }
-  defer session.Close()
+//Updates the components state
+func updateState(state string) string {
+	searchErr := ""
+	selector := bson.M{"name": "car"}
+	update := bson.M{"$set": bson.M{"state": state}}
 
-  c := session.DB("raspiBot").C("components")
-  return c
+	query := func(c *mgo.Collection) error {
+		fn := c.Update(selector, update)
+		return fn
+	}
+
+	search := func() error {
+		return queryWithComponentsCollection(query)
+	}
+
+	err := search()
+	if err != nil {
+		searchErr = "Database Error"
+	}
+	return searchErr
 }
 
-func InsertState(component string, state string, direction string, speed string) {
-  c := openSession()
-  err = c.Insert(&Component{component, state, direction, speed})
-  if err != nil {
-    log.Fatal(err)
-  }
-}
-
-func UpdateState(component string, state string, direction string, speed string) {
-  c := openSession()
-  selector := bson.M{"Name":"car"}
-  update := bson.M{"$inc": bson.M{"Name": component, "State": state, "Direction":direction, "Speed": speed}}
-
-  err := c.Update(selector, update)
-  if err != nil {
-    panic(err)
-  }
-
-}
-
+//Starts the state, if empty it creates one
 func StartCar() {
-	car := GetStateByComponent("car")
-	if car == nil {
-		InsertState("car","on",nil,nil)
+	car, err := GetStateByComponent("car")
+	utilities.CheckForStringErr(err)
+
+	if (Component{}) == car {
+		err = insertState("car", "on", "", "")
+		utilities.CheckForStringErr(err)
 	} else {
-		UpdateState("car","om", nil, nil)
+		err = updateState("on")
+		utilities.CheckForStringErr(err)
 	}
 }
 
+//Updates the state, if empty creates one
 func StopCar() {
-	car := GetStateByComponent("car")
-	if car == nil {
-		InsertState("car","off",nil,nil)
+	car, err := GetStateByComponent("car")
+	utilities.CheckForStringErr(err)
+
+	if (Component{}) == car {
+		err = insertState("car", "off", "", "")
+		utilities.CheckForStringErr(err)
 	} else {
-		UpdateState("car","off", nil, nil)
+		err = updateState("off")
+		utilities.CheckForStringErr(err)
 	}
 }
