@@ -1,8 +1,9 @@
 package robotics
 
 import (
-	"gobot.io/x/gobot/platforms/raspi"
 	"time"
+
+	"gobot.io/x/gobot/platforms/raspi"
 )
 
 const (
@@ -16,22 +17,23 @@ const (
 	BIN2 = "37" //GPIO-20
 
 	//TURN ANGLES
-	// angle45  = 500
-	// angle90  = 700
-	// angle180 = 1300
+	angle45  = 500
+	angle90  = 700
+	angle180 = 1300
 )
 
-var r raspi.Adaptor
+var motorsAdaptor *raspi.Adaptor = new(raspi.Adaptor)
 
 func StartMotors(speed byte, adaptor *raspi.Adaptor) {
 
+	motorsAdaptor = adaptor
 	//board := raspi.NewAdaptor()
 	//board.DigitalWrite(STBY, 1)
 	//r = adaptor
 
-	adaptor.DigitalWrite(STBY, 1)
-	adaptor.PwmWrite(PWMA, speed)
-	adaptor.PwmWrite(PWMB, speed)
+	motorsAdaptor.DigitalWrite(STBY, 1)
+	motorsAdaptor.PwmWrite(PWMA, speed)
+	motorsAdaptor.PwmWrite(PWMB, speed)
 
 	MoveForward()
 }
@@ -53,27 +55,43 @@ func MoveLeft() {
 }
 
 func turn(direction byte, angle time.Duration) {
+
 	if direction == 0 {
 		MoveRight()
 	} else {
-		MoveLeft();
+		MoveLeft()
 	}
+
 	time.Sleep(time.Millisecond * angle)
+	distance := GetDistance(raspiAdaptor)
+
+	if distance < 50 {
+		turn(direction, angle)
+	}
+
 	MoveForward()
 }
 
 func KillMotors() {
 	moveMotors(0, 0, 0, 0)
-	r.DigitalWrite(STBY, 0)
+	motorsAdaptor.DigitalWrite(STBY, 0)
 }
 
 func moveMotors(ain1 byte, ain2 byte, bin1 byte, bin2 byte) {
 
 	// LEFT MOTOR
-	r.DigitalWrite(AIN1, ain1)
-	r.DigitalWrite(AIN2, ain2)
+	motorsAdaptor.DigitalWrite(AIN1, ain1)
+	motorsAdaptor.DigitalWrite(AIN2, ain2)
 
 	// RIGHT MOTOR
-	r.DigitalWrite(BIN1, bin1)
-	r.DigitalWrite(BIN2, bin2)
+	motorsAdaptor.DigitalWrite(BIN1, bin1)
+	motorsAdaptor.DigitalWrite(BIN2, bin2)
+}
+
+func MoveCar() {
+	distance := GetDistance(raspiAdaptor)
+	println(distance)
+	if distance < 50 {
+		turn(0, angle45) //por ahora, solo gira a la derecha
+	}
 }

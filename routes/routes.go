@@ -36,7 +36,7 @@ var Routes = AllRoutes{
 	},
 	Route{
 		"Move",
-		"POST",
+		"GET",
 		"/move",
 		robotics.Move,
 	},

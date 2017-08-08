@@ -1,9 +1,10 @@
 package robotics
 
 import (
+	"time"
+
 	"gobot.io/x/gobot/drivers/gpio"
 	"gobot.io/x/gobot/platforms/raspi"
-	"time"
 )
 
 const (
@@ -12,11 +13,13 @@ const (
 	echo = "31" //GPIO6
 )
 
-func GetDistance() float64 {
-	r := raspi.NewAdaptor()
+var ultraSonicAdapter *raspi.Adaptor = new(raspi.Adaptor)
 
-	trigPin := gpio.NewDirectPinDriver(r, trig)
-	echoPin := gpio.NewDirectPinDriver(r, echo)
+func GetDistance(adaptor *raspi.Adaptor) float64 {
+	ultraSonicAdapter = adaptor
+
+	trigPin := gpio.NewDirectPinDriver(ultraSonicAdapter, trig)
+	echoPin := gpio.NewDirectPinDriver(ultraSonicAdapter, echo)
 
 	trigPin.DigitalWrite(byte(0))
 	time.Sleep(2 * time.Microsecond)
