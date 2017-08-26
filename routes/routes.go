@@ -41,9 +41,9 @@ var Routes = AllRoutes{
 		robotics.Move,
 	},
 	Route{
-		"scanNetwork",
+		"Move",
 		"GET",
-		"/scannetwork",
-		robotics.CheckConnectionStrength,
+		"/checkConnection",
+		robotics.CheckConnection,
 	},
 }

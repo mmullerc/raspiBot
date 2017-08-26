@@ -8,12 +8,8 @@ import (
 )
 
 func CheckNetworkStrngth(c chan string) {
-	// docker build current directory
-	//cmdType := "bash"
-	// /(ESSID)/g
 
 	var result string
-
 	cmdName := "$sudo iwlist wlan0 scan"
 
 	cmd := exec.Command("/bin/sh", "-c", cmdName)

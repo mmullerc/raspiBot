@@ -32,8 +32,6 @@ func initRobot() {
 
 func TurnOnCar(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprint(w, "Starting car!\n")
-	fmt.Printf("%+v\n", robot)
-
 	db.StartCar()
 	if robot != nil {
 		if !robot.Running() {
@@ -66,6 +64,16 @@ func StartListening() {
 			MoveCar()
 		}
 
+		result := CheckConnectionStrength()
+
+		for index := 0; index < len(result); index++ {
+			println("here")
+			fmt.Printf("%+v\n", result[index])
+		}
+
+		// println(result)
+		// fmt.Printf("%+v\n", result)
+
 		//Check general car status
 		car, err := db.GetStateByComponent("car")
 		utilities.CheckForStringErr(err)
@@ -75,37 +83,39 @@ func StartListening() {
 	})
 }
 
-func CheckConnectionStrength(w http.ResponseWriter, req *http.Request) []Signal {
+func CheckConnection(w http.ResponseWriter, req *http.Request) {
+	fmt.Fprint(w, "checking!\n")
+	result := CheckConnectionStrength()
+	println(result)
+	fmt.Printf("%+v\n", result)
+	for index := 0; index < len(result); index++ {
+		fmt.Printf("%+v\n", result[index])
+	}
+}
 
+func CheckConnectionStrength() []Signal {
 	networkObjs := []Signal{}
 	c := make(chan string)
 	go system.CheckNetworkStrngth(c)
 	result := <-c
-	println(result)
 
-	//var essidExists *regexp
-	// re := regexp.MustCompile("KG-Network")
-	// networkName := re.FindString(result)
-	// println(re)
-	// println(networkName)
-	// if len(networkName) > 0 {
-
-	re := regexp.MustCompile("/([0-9A-F]{2}[:-]){5}([0-9A-F]{2})/g")
+	re := regexp.MustCompile(`([0-9A-F]{2}[:-]){5}([0-9A-F]{2})`)
 	accessPoints := re.FindAllString(result, -1)
+
 	re = regexp.MustCompile(`([-][0-9])\w+`)
 	intensityNumbers := re.FindAllString(result, -1)
 
 	for index, accessPoint := range accessPoints {
-		print(accessPoint)
-		print(intensityNumbers)
-		print(index)
+		accesPointExists, err := db.RouterExists(accessPoint)
+		println(err)
 
-		if db.RouterExists(accessPoint) {
+		if accesPointExists {
 			intensityNumber, err := strconv.ParseInt(intensityNumbers[index], 10, 64)
 			if err != nil {
 				panic(err)
 			}
 			addrObject := Signal{macAddress: accessPoint, intensity: intensityNumber}
+			println("creating obj")
 			networkObjs = append(networkObjs, addrObject)
 		}
 	}
