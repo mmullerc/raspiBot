@@ -15,6 +15,10 @@ var raspiAdaptor = raspi.NewAdaptor()
 var robot *gobot.Robot
 var ticker *time.Ticker
 
+type User struct {
+	User string
+}
+
 func initRobot() {
 	robot = gobot.NewRobot("raspiBot",
 		[]gobot.Connection{raspiAdaptor},
@@ -48,14 +52,6 @@ func Move(w http.ResponseWriter, req *http.Request) {
 
 func Navegate(w http.ResponseWriter, req *http.Request) {
 
-	type User struct {
-		User string
-	}
-
-	type Color struct {
-		Color string
-	}
-
 	var u User;
 	var initColor Color;
 
@@ -87,11 +83,12 @@ func Navegate(w http.ResponseWriter, req *http.Request) {
 
 	if initColor.Color != color {
 		output := fmt.Sprintf("%v%s%v%s%v", u.User," is in the ",color, " table. The car location is in", initColor)
+
+		StartMotors(byte(255), raspiAdaptor)
 		fmt.Printf(output)
     	fmt.Fprint(w, output)
 	} else {
-		output := fmt.Sprintf("%v%s%v%s%v","The car is in the ",u.User,"'s table already")
-
+		output := fmt.Sprintf("%s%v%s","The car is in the ",u.User,"'s table already")
 		fmt.Printf(output)
     	fmt.Fprint(w, output)
 	}

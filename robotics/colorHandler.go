@@ -3,6 +3,7 @@ package robotics
 import (
 	"fmt"
 	"net/http"
+	"raspibot/db"
 	"encoding/json"
 )
 
@@ -27,5 +28,7 @@ func SetColor(w http.ResponseWriter, r *http.Request) {
     output := fmt.Sprintf("%s%v", "Recieved color: ", u.Color)
     fmt.Printf(output)
     fmt.Fprint(w, output)
+
+    db.StopCar()
 
 }
