@@ -1,29 +1,9 @@
 from color_sensor import sense_colors
 import json
-from threading import Timer, Thread, Event
 import requests
+from thread_class import perpetualTimer
 
 urlSetColor = "http://localhost:8080/setcolor"
-
-class perpetualTimer():
-	def __init__(self,t,hFunction):
-		self.t=t
-		self.hFunction = hFunction
-		self.thread = Timer(self.t,self.handle_function)
-
-	def handle_function(self):
-		self.hFunction()
-		self.thread = Timer(self.t,self.handle_function)
-		self.thread.start()
-
-	def start(self):
-		self.thread.start()
-
-	def cancel(self):
-		self.thread.cancel()
-
-	def isRunning(self):
-		return self.thread.isAlive()
 
 #read sensor
 def getColor():
@@ -48,12 +28,14 @@ def startReading():
 	global t
 	if t.isRunning() is not True:
 		t.start()
+
 	return getColor()
 
 #stops the thread
 def stopReading():
 	global t
 	t.cancel()
+	t = perpetualTimer(1,getColor)
 	return "Not reading colors"
 
 #send a post request to set color
