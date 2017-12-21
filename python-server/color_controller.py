@@ -20,7 +20,8 @@ def getColor():
     json_data = json.dumps(data)
 
     if(r == 100 & g == 100 & b == 100):
-    	setColor(r,g,b)
+    	color = 'blue'
+    	setColor(color)
 
     return json_data
 
@@ -43,11 +44,6 @@ def stopReading():
 	return "Not reading colors"
 
 #send a post request to set color
-def setColor(r,g,b):
-	data = {}
-	data['red'] = r
-	data['green'] = g
-	data['blue'] = b
-	json_data = json.dumps(data)
-	r = requests.post(urlSetColor, data)
+def setColor(color):
+	r = requests.post(urlSetColor, json={"color": color})
 	print(r.status_code, r.reason)

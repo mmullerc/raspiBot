@@ -23,9 +23,9 @@ def sense_colors():
 
 	# Calculate lux with another utility function.
 	#lux = Adafruit_TCS34725.calculate_lux(r, g, b)
-	r = 150
-	g = 151
-	b = 152
+	r = 100
+	g = 100
+	b = 100
 	c = 153
 	color_temp = 154
 	lux = 155
