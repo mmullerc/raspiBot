@@ -6,7 +6,7 @@ import (
 	"raspibot/db"
 	"raspibot/utilities"
 	"time"
-	"log"
+    "os"
 	"encoding/json"
 	"gobot.io/x/gobot"
 	"gobot.io/x/gobot/platforms/raspi"
@@ -54,12 +54,13 @@ func Navegate(w http.ResponseWriter, req *http.Request) {
 	}
 
 	type Color struct {
-		Blue string
-		Red string
-		Green string
+		Blue int
+		Red int
+		Green int
 	}
 
 	var u User;
+	var initColor Color;
 
     if req.Body == nil {
         http.Error(w, "Please send a request body", 400)
@@ -73,33 +74,27 @@ func Navegate(w http.ResponseWriter, req *http.Request) {
     
     color := db.FindLocation(u.User)
     fmt.Printf(color)
-    
-    resp, err2 := http.Get("http://localhost:5000/startReading")
-	if err2 != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("%s%v","resp",resp)
 
-	// var initColor Color;
+	response, err2 := http.Get("http://localhost:5000/startReading")
+    if err2 != nil {
+        fmt.Printf("%s", err2)
+        os.Exit(1)
+    } else {
+        defer response.Body.Close()
+        errInitColor := json.NewDecoder(response.Body).Decode(&initColor)
+        if errInitColor != nil {
+            fmt.Printf("%s", errInitColor)
+            os.Exit(1)
+        }
+    }
 
- //    if resp.Body == nil {
- //        http.Error(w, "Please send a request body", 400)
- //        return
- //    }
- //    err3 := json.NewDecoder(resp.Body).Decode(&initColor)
- //    if err3 != nil {
- //        log.Fatal(err2)
- //        return
- //    }
 
-	// defer resp.Body.Close()
+	fmt.Printf("%v\n", initColor)
 
-	// fmt.Printf("%v",initColor)
+	output := fmt.Sprintf("%v%s%v%s%v", u.User," is in the ",color, " table. The initial color is: ", initColor)
+    fmt.Printf(output)
 
-	// output := fmt.Sprintf("%v%s%v%s%v", u.User," is in the ",color, " table. The initial color is: ", initColor)
- //    fmt.Printf(output)
-
-    // fmt.Fprint(w, output)
+    fmt.Fprint(w, output)
 
 }
 
