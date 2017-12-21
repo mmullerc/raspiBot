@@ -1,2 +1,0 @@
-print("hi")
-return "hello"
