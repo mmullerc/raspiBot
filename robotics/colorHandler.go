@@ -3,31 +3,29 @@ package robotics
 import (
 	"fmt"
 	"net/http"
-	// "encoding/json"
-	 //"io"
-	 "io/ioutil"
-	// "raspibot/db"
-	// "raspibot/utilities"
-	// "time"
-
-	// "gobot.io/x/gobot"
-	// "gobot.io/x/gobot/platforms/raspi"
+	"encoding/json"
 )
 
 type Color struct {
-	color string
+	Color string
+	Id int
 }
 
-func SetColor(w http.ResponseWriter, req *http.Request) {
+func SetColor(w http.ResponseWriter, r *http.Request) {
 	
-	body, err := ioutil.ReadAll(req.Body)
-		if err != nil {
-			http.Error(w, "Error reading request body",
-				http.StatusInternalServerError)
-		}
-		results := string(body)
+	var u Color
 
-		fmt.Fprint(w, results)
+    if r.Body == nil {
+        http.Error(w, "Please send a request body", 400)
+        return
+    }
+    err := json.NewDecoder(r.Body).Decode(&u)
+    if err != nil {
+        http.Error(w, err.Error(), 400)
+        return
+    }
+    output := fmt.Sprintf("%s%v", "Recieved color: ", u.Color)
+    fmt.Printf(output)
+    fmt.Fprint(w, output)
 
-    fmt.Printf("%+v\n", results)
 }

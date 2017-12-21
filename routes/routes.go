@@ -41,6 +41,12 @@ var Routes = AllRoutes{
 		robotics.Move,
 	},
 	Route{
+		"Navegate",
+		"POST",
+		"/navegate",
+		robotics.Navegate,
+	},
+	Route{
 		"SetColor",
 		"POST",
 		"/setcolor",
