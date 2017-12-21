@@ -15,6 +15,10 @@ def getColor():
     json_data = json.dumps(data)
     print('Color: red={0} green={1} blue={2}'.format(r, g, b))
 
+    data = {}
+    data['color'] = 'red'
+    json_data = json.dumps(data)
+
     if(r == 100 & g == 100 & b == 100):
     	setColor(r,g,b)
 
