@@ -2,3 +2,7 @@
 ###################
 server
 *.exe
+
+python-server/color_controller.pyc
+python-server/color_sensor.pyc
+python-server/server.pyc
