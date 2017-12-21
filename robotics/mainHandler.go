@@ -6,7 +6,6 @@ import (
 	"raspibot/db"
 	"raspibot/utilities"
 	"time"
-    "os"
 	"encoding/json"
 	"gobot.io/x/gobot"
 	"gobot.io/x/gobot/platforms/raspi"
@@ -54,9 +53,7 @@ func Navegate(w http.ResponseWriter, req *http.Request) {
 	}
 
 	type Color struct {
-		Blue int
-		Red int
-		Green int
+		Color string
 	}
 
 	var u User;
@@ -78,23 +75,27 @@ func Navegate(w http.ResponseWriter, req *http.Request) {
 	response, err2 := http.Get("http://localhost:5000/startReading")
     if err2 != nil {
         fmt.Printf("%s", err2)
-        os.Exit(1)
     } else {
         defer response.Body.Close()
         errInitColor := json.NewDecoder(response.Body).Decode(&initColor)
         if errInitColor != nil {
             fmt.Printf("%s", errInitColor)
-            os.Exit(1)
         }
     }
 
-
 	fmt.Printf("%v\n", initColor)
 
-	output := fmt.Sprintf("%v%s%v%s%v", u.User," is in the ",color, " table. The initial color is: ", initColor)
-    fmt.Printf(output)
+	if initColor.Color != color {
+		output := fmt.Sprintf("%v%s%v%s%v", u.User," is in the ",color, " table. The car location is in", initColor)
+		fmt.Printf(output)
+    	fmt.Fprint(w, output)
+	} else {
+		output := fmt.Sprintf("%v%s%v%s%v","The car is in the ",u.User,"'s table already")
 
-    fmt.Fprint(w, output)
+		fmt.Printf(output)
+    	fmt.Fprint(w, output)
+	}
+    
 
 }
 
