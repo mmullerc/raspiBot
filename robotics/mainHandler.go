@@ -14,6 +14,7 @@ import (
 var raspiAdaptor = raspi.NewAdaptor()
 var robot *gobot.Robot
 var ticker *time.Ticker
+var Direction string;
 
 type User struct {
 	User string
@@ -50,7 +51,7 @@ func Move(w http.ResponseWriter, req *http.Request) {
 	StartMotors(byte(255), raspiAdaptor)
 }
 
-func Navegate(w http.ResponseWriter, req *http.Request) {
+func Navigate(w http.ResponseWriter, req *http.Request) {
 
 	var u User;
 	var initColor Color;
@@ -66,7 +67,8 @@ func Navegate(w http.ResponseWriter, req *http.Request) {
     }
     
     color := db.FindLocation(u.User)
-    fmt.Printf(color)
+    Direction = string(color)
+    fmt.Printf(Direction)
 
 	response, err2 := http.Get("http://localhost:5000/startReading")
     if err2 != nil {
@@ -80,10 +82,10 @@ func Navegate(w http.ResponseWriter, req *http.Request) {
     }
 
 	fmt.Printf("%v\n", initColor)
+	db.UpdateDirection(Direction)
 
-	if initColor.Color != color {
-		output := fmt.Sprintf("%v%s%v%s%v", u.User," is in the ",color, " table. The car location is in", initColor)
-
+	if initColor.Color != Direction {
+		output := fmt.Sprintf("%v%s%v%s%v", u.User," is in the ",Direction, " table. The car location is in", initColor.Color)
 		StartMotors(byte(255), raspiAdaptor)
 		fmt.Printf(output)
     	fmt.Fprint(w, output)

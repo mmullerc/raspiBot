@@ -9,7 +9,6 @@ import (
 
 type Color struct {
 	Color string
-	Id int
 }
 
 func SetColor(w http.ResponseWriter, r *http.Request) {
@@ -31,6 +30,17 @@ func SetColor(w http.ResponseWriter, r *http.Request) {
     fmt.Printf(output)
     fmt.Fprint(w, output)
 
-    db.StopCar()
+    if u.Color == Direction {
+    	response, err2 := http.Get("http://localhost:5000/stopReading")
+	    if err2 != nil {
+	        fmt.Printf("%s", err2)
+	    } else {
+	        defer response.Body.Close()
+	    }
+
+	    db.StopCar()
+    }
+
+    
 
 }
