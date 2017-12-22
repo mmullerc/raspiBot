@@ -2,6 +2,14 @@
 ###################
 server
 *.exe
+*.tar.gz
+*.deb
+
+node_modules
+.env.json
+log
+.idea/
+
 
 python-server/color_controller.pyc
 python-server/color_sensor.pyc

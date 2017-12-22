@@ -1,0 +1,88 @@
+{
+  "parser": "babel-eslint",
+  "parserOptions": {
+    "esversion": 6,
+    "ecmaVersion": 6,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "node-style-guide"
+  ],
+  "env": {
+    "node": true,
+    "jest": true,
+    "es6": true
+  },
+  "plugins": [
+    "react"
+  ],
+  "ecmaFeatures": {
+    "jsx": true,
+    "arrowFunctions": true,
+    "blockBindings": true,
+    "classes": true,
+    "destructuring": true,
+    "forOf": true,
+    "templateStrings": true,
+    "restParams": true,
+    "spread": true,
+    "objectLiteralShorthandMethods": true,
+    "objectLiteralShorthandProperties": true,
+    "modules": false
+  },
+  "rules": {
+    "block-scoped-var": 2,
+    "comma-dangle": [2, "always-multiline"],
+    "consistent-return": 2,
+    "consistent-this": [2, "self"],
+    "eqeqeq": 2,
+    "no-alert": 2,
+    "no-cond-assign": 2,
+    "no-constant-condition": 2,
+    "no-control-regex": 2,
+    "no-dupe-args": 2,
+    "no-dupe-keys": 2,
+    "no-duplicate-case": 2,
+    "no-empty-character-class": 2,
+    "no-empty": 2,
+    "no-eval": 2,
+    "no-ex-assign": 2,
+    "no-func-assign": 2,
+    "no-negated-in-lhs": 2,
+    "no-obj-calls": 2,
+    "no-redeclare": [2, {"builtinGlobals": true}],
+    "no-sparse-arrays": 2,
+    "no-undef": 2,
+    "no-unreachable": 2,
+    "quotes": [2, "single", {"avoidEscape": true, "allowTemplateLiterals": true}],
+    "semi": [2, "always"],
+    "strict": [2, "global"],
+    "use-isnan": 2,
+    "valid-typeof": 2,
+    "space-after-keywords": 0,
+
+    "default-case": 1,
+    "global-require": 1,
+    "no-debugger": 1,
+    "no-extend-native": 1,
+    "no-extra-boolean-cast": 1,
+    "no-extra-semi": 1,
+    "no-regex-spaces": 1,
+    "no-unexpected-multiline": 1,
+    "no-unused-vars": [1, {"vars": "all", "args": "after-used"}],
+    "no-console": [1, {"allow": ["warn", "error", "info", "log", "groupEnd", "groupCollapsed"]}],
+    "no-useless-call": 1,
+    "valid-jsdoc": 0,
+    "indent": [2, 2],
+    "no-irregular-whitespace": 1,
+    "max-len": [1, {"code": 160, "tabWidth": 2, "ignoreUrls": true}],
+
+    "react/prop-types": 1,
+    "react/no-string-refs": 2
+  }
+}
