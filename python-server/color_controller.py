@@ -9,6 +9,8 @@ urlSetColor = "http://localhost:8080/setcolor"
 #read sensor
 def getColor():
     r, g, b = sense_colors()
+    print('RGB')
+    print(r,g,b)
     h, s, v = colorsys.rgb_to_hsv(r/255., g/255., b/255.)
 
     h = h * 360
@@ -21,7 +23,7 @@ def getColor():
     data = {}
     data['color'] = color
     json_data = json.dumps(data)
-    
+
     print(color)
     if color != 'unknown':
     	setColor(color)
@@ -56,7 +58,7 @@ def colorNameFromHsv(h,s,v):
 	colorName = ''
 	if (h < 15 or h > 315):
 		colorName = 'red'
-	elif (250 > h > 210):
+	elif (250 > h > 170):
 		colorName = 'blue'
 	elif (125 > h > 80):
 		colorName = 'green'
