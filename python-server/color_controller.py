@@ -11,7 +11,7 @@ def getColor():
     r, g, b = sense_colors()
     print('RGB')
     print(r,g,b)
-    h, s, v = colorsys.rgb_to_hsv(r/255., g/255., b/255.)
+    h, s, v = colorsys.rgb_to_hsv(r/1024., g/1024., b/1024.)
 
     h = h * 360
     s = s * 100
@@ -55,16 +55,18 @@ def setColor(color):
 
 #sets a name for color in a range
 def colorNameFromHsv(h,s,v):
-	colorName = ''
-	if (h < 15 or h > 315):
-		colorName = 'red'
-	elif (250 > h > 170):
-		colorName = 'blue'
-	elif (125 > h > 80):
-		colorName = 'green'
-	elif (70 > h > 45):
-		colorName = 'yellow'
-	else:
-		colorName = 'unknown'
+	colorName = 'unknown'
+	if (s > 30):
+		if (h < 15 or h > 315):
+			colorName = 'red'
+		elif (45 > h > 25):
+			colorName = 'yellow'
+	elif (s < 30):
+		if (250 > h > 170):
+			colorName = 'blue'
+		elif(125 > h > 85):
+			colorName = 'green'
+		elif(60 > h > 45):
+			colorName = 'white'
 
 	return colorName
