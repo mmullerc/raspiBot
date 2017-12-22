@@ -2,8 +2,6 @@
 ###################
 server
 *.exe
-*.tar.gz
-*.deb
 
 node_modules
 .env.json
