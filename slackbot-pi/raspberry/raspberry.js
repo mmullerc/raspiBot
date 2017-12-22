@@ -16,6 +16,12 @@ module.exports = {
      let command = message.text.replace('pi ', '');
      let params = command.split(' ');
 
+     console.log(message)
+
+     if (message.text.startsWith('pi add me')) {
+        web.chat.postMessage(message.channel, 'hello', opts);
+        return
+     }
     //Validations
     if(params.length < 2) {
       web.chat.postMessage(message.channel, 'Not enough parameters', opts);
