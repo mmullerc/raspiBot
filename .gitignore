@@ -3,6 +3,12 @@
 server
 *.exe
 
+node_modules
+.env.json
+log
+.idea/
+
+
 python-server/color_controller.pyc
 python-server/color_sensor.pyc
 python-server/server.pyc
