@@ -1,4 +1,4 @@
-from color_sensor import sense_colors
+import color_sensor
 import json
 import requests
 from thread_class import perpetualTimer
@@ -8,7 +8,7 @@ urlSetColor = "http://localhost:8080/setcolor"
 
 #read sensor
 def getColor():
-    r, g, b = sense_colors()
+    r, g, b = color_sensor.colorSensor()
     print('RGB')
     print(r,g,b)
     h, s, v = colorsys.rgb_to_hsv(r/1024., g/1024., b/1024.)
