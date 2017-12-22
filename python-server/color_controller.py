@@ -2,25 +2,28 @@ from color_sensor import sense_colors
 import json
 import requests
 from thread_class import perpetualTimer
+import colorsys
 
 urlSetColor = "http://localhost:8080/setcolor"
 
 #read sensor
 def getColor():
     r, g, b = sense_colors()
-    data = {}
-    data['red'] = r
-    data['green'] = g
-    data['blue'] = b
-    json_data = json.dumps(data)
-    print('Color: red={0} green={1} blue={2}'.format(r, g, b))
+    h, s, v = colorsys.rgb_to_hsv(r/255., g/255., b/255.)
 
-    data = {}
-    data['color'] = 'red'
-    json_data = json.dumps(data)
+    h = h * 360
+    s = s * 100
+    v = v * 100
+    print('HSV')
+    print(h,s,v)
 
-    if(r == 100 & g == 100 & b == 100):
-    	color = 'blue'
+    color = colorNameFromHsv(h,s,v)
+    data = {}
+    data['color'] = color
+    json_data = json.dumps(data)
+    
+    print(color)
+    if color != 'unknown':
     	setColor(color)
 
     return json_data
@@ -47,3 +50,19 @@ def stopReading():
 def setColor(color):
 	r = requests.post(urlSetColor, json={"color": color})
 	print(r.status_code, r.reason)
+
+#sets a name for color in a range
+def colorNameFromHsv(h,s,v):
+	colorName = ''
+	if (h < 15 or h > 315):
+		colorName = 'red'
+	elif (250 > h > 210):
+		colorName = 'blue'
+	elif (125 > h > 80):
+		colorName = 'green'
+	elif (70 > h > 45):
+		colorName = 'yellow'
+	else:
+		colorName = 'unknown'
+
+	return colorName
