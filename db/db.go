@@ -110,6 +110,28 @@ func updateState(state string) string {
 	return searchErr
 }
 
+//Updates the components direction
+func UpdateDirection(direction string) string {
+	searchErr := ""
+	selector := bson.M{"name": "car"}
+	update := bson.M{"$set": bson.M{"direction": direction}}
+
+	query := func(c *mgo.Collection) error {
+		fn := c.Update(selector, update)
+		return fn
+	}
+
+	search := func() error {
+		return queryWithComponentsCollection(query)
+	}
+
+	err := search()
+	if err != nil {
+		searchErr = "Database Error"
+	}
+	return searchErr
+}
+
 
 //Updates the components state
 func FindLocation(user string) string {
