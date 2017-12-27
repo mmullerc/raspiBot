@@ -38,6 +38,11 @@ func SetColor(w http.ResponseWriter, r *http.Request) {
             defer response.Body.Close()
         }
 
+        respSlack, errSlack := http.Get("http://localhost:8089/arrived")
+        if errSlack != nil {
+            fmt.Printf("%s", errSlack)
+        }
+        
         db.StopCar()
     }
 
