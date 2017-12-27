@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
 
-var componentsSchema = mongoose.Schema({
+var usersSchema = mongoose.Schema({
   name: String,
   botId: String,
   direction: String,

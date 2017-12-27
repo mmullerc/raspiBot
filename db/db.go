@@ -24,6 +24,7 @@ const (
 	MONGO_CONN_STR        = "10.28.6.16"
 	DATABASE_NAME         = "raspiBot"
 	COMPONENTS_COLLECTION = "components"
+	USERS_COLECTION 	  =	"users"
 )
 
 //Retruns a NEW session, but reuses the same socket as the original session
@@ -44,6 +45,15 @@ func queryWithComponentsCollection(fn func(*mgo.Collection) error) error {
 	session := getMongoSession()
 	defer session.Close()
 	c := session.DB(DATABASE_NAME).C(COMPONENTS_COLLECTION) // This can be parameterized later so it's more dynamic
+	return fn(c)
+}
+
+//High order function
+//Handles session.close when done
+func queryWithUsersCollection(fn func(*mgo.Collection) error) error {
+	session := getMongoSession()
+	defer session.Close()
+	c := session.DB(DATABASE_NAME).C(USERS_COLECTION) // This can be parameterized later so it's more dynamic
 	return fn(c)
 }
 
@@ -130,30 +140,6 @@ func UpdateDirection(direction string) string {
 		searchErr = "Database Error"
 	}
 	return searchErr
-}
-
-
-//Updates the components state
-func FindLocation(user string) string {
-	// searchErr := ""
-	// selector := bson.M{"name": "car"}
-	// update := bson.M{"$set": bson.M{"name": user}}
-
-	// query := func(c *mgo.Collection) error {
-	// 	fn := c.Update(selector, update)
-	// 	return fn
-	// }
-
-	// search := func() error {
-	// 	return queryWithComponentsCollection(query)
-	// }
-
-	// err := search()
-	// if err != nil {
-	// 	searchErr = "Database Error"
-	// }
-	// return searchErr
-	return "red"
 }
 
 

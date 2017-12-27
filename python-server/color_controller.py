@@ -1,4 +1,4 @@
-#import color_sensor
+import color_sensor
 import json
 import requests
 from thread_class import perpetualTimer
@@ -52,7 +52,7 @@ def getColor():
 
     if jdata['color'] != 'unknown':
     	print(jdata['color'])
-    	setColor(color)
+    	setColor(jdata['color'])
 
     return json_color
 
