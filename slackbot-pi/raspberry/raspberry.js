@@ -1,5 +1,6 @@
 var request = require('request');
 var Components = require('../models/components');
+var Users = require('../models/users');
 
 let opts = {
  'as_user': true,
@@ -16,17 +17,57 @@ module.exports = {
      let command = message.text.replace('pi ', '');
      let params = command.split(' ');
 
-     console.log(message)
+     console.log(params)
 
-     if (message.text.startsWith('pi add me')) {
-        web.chat.postMessage(message.channel, 'hello', opts);
-        return
-     }
+     
+
+      if (params[0] == "delete") {
+        if (params.length > 1) {
+
+          let userId = params[1].replace(/[^a-zA-Z0-9 ]/g, "")
+
+          console.log(userId);
+
+          web.chat.postMessage(message.channel, 'hello', opts);
+          deleteUser({
+                      botId : userId,
+                  });
+
+          return
+        } else {
+          web.chat.postMessage(message.channel, 'Not enough parameters', opts);
+          return
+        }
+      }
+
+      if (params[0] == 'add') {
+
+        if (params.length > 2) {
+
+          let userId = params[1].replace(/[^a-zA-Z0-9 ]/g, "");
+          let direction = params[2];
+
+          console.log(userId);
+
+          web.chat.postMessage(message.channel, 'hello', opts);
+          addUser({
+                      botId : userId,
+                      direction : direction,
+                  });
+          return
+        } else {
+          web.chat.postMessage(message.channel, 'Not enough parameters', opts);
+          return
+        }
+      }
+     
+
     //Validations
     if(params.length < 2) {
       web.chat.postMessage(message.channel, 'Not enough parameters', opts);
       return;
     }
+
 
     if(['motor', 'lights'].indexOf(params[0]) < 0) {
       web.chat.postMessage(message.channel, 'Sorry, ' + params[0] + ' is not yet active.', opts);
@@ -95,4 +136,37 @@ function updateComponent(component) {
     if(err) result="Error: " + err;
     console.log(result);
   });
+}
+
+async function addUser(user) {
+  const query = {"botId": user.botId};
+  let userExist = await findUser(query);
+
+  if (!userExist) {
+    console.log("new user");
+    const newUser = new Users(user);
+    newUser.save()
+  } else {
+    console.log("user exist");
+  }
+  
+}
+
+async function findUser(query) {
+  var x;
+  await Users.findOne(query,function(err, doc) {
+    x = doc;
+  });
+  return  x;
+}
+
+async function deleteUser(user) {
+  const query = {"botId": user.botId};
+  let userExist = await findUser(query);
+    if(userExist) {
+      userExist.remove()
+      console.log("removed");
+    } else {
+      console.log("user dosn't exist");
+    }
 }

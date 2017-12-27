@@ -1,24 +1,20 @@
 package robotics
 
 import (
+	"encoding/json"
 	"fmt"
+	"gobot.io/x/gobot"
+	"gobot.io/x/gobot/platforms/raspi"
 	"net/http"
 	"raspibot/db"
 	"raspibot/utilities"
 	"time"
-	"encoding/json"
-	"gobot.io/x/gobot"
-	"gobot.io/x/gobot/platforms/raspi"
 )
 
 var raspiAdaptor = raspi.NewAdaptor()
 var robot *gobot.Robot
 var ticker *time.Ticker
-var Direction string;
-
-type User struct {
-	User string
-}
+var Direction string
 
 func initRobot() {
 	robot = gobot.NewRobot("raspiBot",
@@ -53,48 +49,51 @@ func Move(w http.ResponseWriter, req *http.Request) {
 
 func Navigate(w http.ResponseWriter, req *http.Request) {
 
-	var u User;
-	var initColor Color;
+	var u Color
+	var initColor Color
 
-    if req.Body == nil {
-        http.Error(w, "Please send a request body", 400)
-        return
-    }
-    err := json.NewDecoder(req.Body).Decode(&u)
-    if err != nil {
-        http.Error(w, err.Error(), 400)
-        return
-    }
-    
-    color := db.FindLocation(u.User)
-    Direction = string(color)
-    fmt.Printf(Direction)
+	if req.Body == nil {
+		http.Error(w, "Please send a request body", 400)
+		return
+	}
+	err := json.NewDecoder(req.Body).Decode(&u)
+	if err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
 
-	response, err2 := http.Get("http://localhost:5000/startReading")
-    if err2 != nil {
-        fmt.Printf("%s", err2)
-    } else {
-        defer response.Body.Close()
-        errInitColor := json.NewDecoder(response.Body).Decode(&initColor)
-        if errInitColor != nil {
-            fmt.Printf("%s", errInitColor)
-        }
-    }
+	Direction = u.Color
+	fmt.Printf("%s%v", "Navigating to: ", u)
+
+	response, err2 := http.Get("http://localhost:5000/currentColor")
+
+	fmt.Printf("%s%v", "initialColor: ", response)
+	if err2 != nil {
+		fmt.Printf("%s", err2)
+	} else {
+		defer response.Body.Close()
+		errInitColor := json.NewDecoder(response.Body).Decode(&initColor)
+		if errInitColor != nil {
+			fmt.Printf("%s", errInitColor)
+		}
+	}
 
 	fmt.Printf("%v\n", initColor)
 	db.UpdateDirection(Direction)
 
 	if initColor.Color != Direction {
-		output := fmt.Sprintf("%v%s%v%s%v", u.User," is in the ",Direction, " table. The car location is in", initColor.Color)
+		output := fmt.Sprintf("%v%s%v%s%v", u.Color, " is in the ", Direction, " table. The car location is in", initColor.Color)
+
+		http.Get("http://localhost:5000/startReading")
+
 		StartMotors(byte(255), raspiAdaptor)
 		fmt.Printf(output)
-    	fmt.Fprint(w, output)
+		fmt.Fprint(w, output)
 	} else {
-		output := fmt.Sprintf("%s%v%s","The car is in the ",u.User,"'s table already")
+		output := fmt.Sprintf("%s%v%s", "The car is in the ", u.Color, "'s table already")
 		fmt.Printf(output)
-    	fmt.Fprint(w, output)
+		fmt.Fprint(w, output)
 	}
-    
 
 }
 

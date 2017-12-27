@@ -1,4 +1,4 @@
-#import color_sensor
+import color_sensor
 import json
 import requests
 from thread_class import perpetualTimer
@@ -12,7 +12,7 @@ def getColor():
 
     if jdata['color'] != 'unknown':
     	print(jdata['color'])
-    	#setColor(color)
+    	setColor(jdata['color'])
 
     return currentColor()
 
@@ -58,10 +58,10 @@ def colorNameFromHsv(h,s,v):
 	return colorName
 
 def currentColor():
-    #r, g, b = color_sensor.colorSensor()
-    r = 1024
-    g = 0
-    b = 0
+    r, g, b = color_sensor.colorSensor()
+    # r = 1024
+    # g = 0
+    # b = 0
 
     h, s, v = colorsys.rgb_to_hsv(r/1024., g/1024., b/1024.)
     h = h * 360
