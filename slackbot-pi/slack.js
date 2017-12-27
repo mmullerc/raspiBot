@@ -28,7 +28,7 @@ var tryToConnect = function() {
       }
 
       userid = rtmStartData.self.id;
-      channel = 'D62PY4S2D';
+      channel = 'D5W4WB8KU';
       winston.info('I am user # ' + userid);
     });
 

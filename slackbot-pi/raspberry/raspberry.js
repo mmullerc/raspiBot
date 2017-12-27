@@ -1,6 +1,7 @@
-var request = require('request');
-var Components = require('../models/components');
-var Users = require('../models/users');
+const request = require('request');
+const Components = require('../models/components');
+const Users = require('../models/users');
+const navigateUrl = 'http://10.28.6.22:8080/navigate';
 
 let opts = {
  'as_user': true,
@@ -13,53 +14,72 @@ let component = {
 };
 
 module.exports = {
-   raspberry: (message, web) => {
-     let command = message.text.replace('pi ', '');
-     let params = command.split(' ');
+  raspberry: async (message, web) => {
+    let command = message.text.replace('pi ', '');
+    let params = command.split(' ');
 
-     console.log(params)
+    console.log(params)     
 
-     
+    if (params[0] == "delete") {
+      if (params.length > 1) {
 
-      if (params[0] == "delete") {
-        if (params.length > 1) {
+        let userId = params[1].replace(/[^a-zA-Z0-9 ]/g, "")
 
-          let userId = params[1].replace(/[^a-zA-Z0-9 ]/g, "")
+        console.log(userId);
 
-          console.log(userId);
+        web.chat.postMessage(message.channel, 'hello', opts);
+        deleteUser({
+          botId : userId,
+        });
+        return
 
-          web.chat.postMessage(message.channel, 'hello', opts);
-          deleteUser({
-                      botId : userId,
-                  });
+      } else {
+        web.chat.postMessage(message.channel, 'Not enough parameters', opts);
+        return
+      }
+    }
 
-          return
-        } else {
-          web.chat.postMessage(message.channel, 'Not enough parameters', opts);
-          return
-        }
+    if (params[0] == 'add') {
+
+      if (params.length > 2) {
+
+        let userId = params[1].replace(/[^a-zA-Z0-9 ]/g, "");
+        let direction = params[2];
+
+        console.log(userId);
+
+        web.chat.postMessage(message.channel, 'hello', opts);
+        addUser({
+          botId : userId,
+          direction : direction,
+        });
+        return
+
+      } else {
+        web.chat.postMessage(message.channel, 'Not enough parameters', opts);
+        return
+      }
+    }
+
+    if(params[0] == 'come' && params[1] == 'here'){
+      //Car should go to user's location
+      let user = await findUser({"botId": message.user});
+
+      // Configure the request
+      var options = {
+        uri:     navigateUrl,
+        method:  'POST',
+        json: {'color': user.direction}
       }
 
-      if (params[0] == 'add') {
-
-        if (params.length > 2) {
-
-          let userId = params[1].replace(/[^a-zA-Z0-9 ]/g, "");
-          let direction = params[2];
-
-          console.log(userId);
-
-          web.chat.postMessage(message.channel, 'hello', opts);
-          addUser({
-                      botId : userId,
-                      direction : direction,
-                  });
-          return
-        } else {
-          web.chat.postMessage(message.channel, 'Not enough parameters', opts);
-          return
+      // Start the request
+      request(options, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+          web.chat.postMessage(message.channel, 'Going to your desk', opts);
         }
-      }
+      })
+      
+    }
      
 
     //Validations
@@ -163,10 +183,10 @@ async function findUser(query) {
 async function deleteUser(user) {
   const query = {"botId": user.botId};
   let userExist = await findUser(query);
-    if(userExist) {
-      userExist.remove()
-      console.log("removed");
-    } else {
-      console.log("user dosn't exist");
-    }
+  if(userExist) {
+    userExist.remove()
+    console.log("removed");
+  } else {
+    console.log("user dosn't exist");
+  }
 }
