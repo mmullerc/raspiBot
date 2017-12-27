@@ -19,6 +19,11 @@ def stopReading():
 	res = color_controller.stopReading()
 	return res
 
+@app.route("/currentColor")
+def currentColor():
+	res = color_controller.currentColor()
+	return res
+
 
 if __name__ == "__main__":
     app.run()

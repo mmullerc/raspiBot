@@ -1,4 +1,4 @@
-import color_sensor
+#import color_sensor
 import json
 import requests
 from thread_class import perpetualTimer
@@ -8,27 +8,13 @@ urlSetColor = "http://localhost:8080/setcolor"
 
 #read sensor
 def getColor():
-    r, g, b = color_sensor.colorSensor()
-    print('RGB')
-    print(r,g,b)
-    h, s, v = colorsys.rgb_to_hsv(r/1024., g/1024., b/1024.)
+    jdata = json.loads(currentColor())
 
-    h = h * 360
-    s = s * 100
-    v = v * 100
-    print('HSV')
-    print(h,s,v)
+    if jdata['color'] != 'unknown':
+    	print(jdata['color'])
+    	#setColor(color)
 
-    color = colorNameFromHsv(h,s,v)
-    data = {}
-    data['color'] = color
-    json_data = json.dumps(data)
-
-    print(color)
-    if color != 'unknown':
-    	setColor(color)
-
-    return json_data
+    return currentColor()
 
 #thread global variable
 t = perpetualTimer(1,getColor)
@@ -70,3 +56,23 @@ def colorNameFromHsv(h,s,v):
 			colorName = 'white'
 
 	return colorName
+
+def currentColor():
+    #r, g, b = color_sensor.colorSensor()
+    r = 1024
+    g = 0
+    b = 0
+
+    h, s, v = colorsys.rgb_to_hsv(r/1024., g/1024., b/1024.)
+    h = h * 360
+    s = s * 100
+    v = v * 100
+    print('HSV')
+    print(h,s,v)
+
+    color = colorNameFromHsv(h,s,v)
+    data = {}
+    data['color'] = color
+    json_data = json.dumps(data)
+
+    return json_data
