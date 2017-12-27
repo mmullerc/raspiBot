@@ -1,21 +1,21 @@
-from threading import Timer, Thread, Event
+import time
 
 class perpetualTimer():
-	def __init__(self,t,hFunction):
+	def __init__(self,t,callback):
 		self.t=t
-		self.hFunction = hFunction
-		self.thread = Timer(self.t,self.handle_function)
-
-	def handle_function(self):
-		self.hFunction()
-		self.thread = Timer(self.t,self.handle_function)
-		self.thread.start()
+		self.callback = callback
+		self.running = False
 
 	def start(self):
-		self.thread.start()
+		self.running = True
 
-	def cancel(self):
-		self.thread.cancel()
+	def run(self):
+		while self.running:
+			time.sleep(self.t)
+			self.callback()
+
+	def stop(self):
+		self.running = False
 
 	def isRunning(self):
-		return self.thread.isAlive()
+		return self.running

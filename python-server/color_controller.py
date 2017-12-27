@@ -3,41 +3,9 @@ import json
 import requests
 from thread_class import perpetualTimer
 import colorsys
+import threading
 
 urlSetColor = "http://localhost:8080/setcolor"
-
-#read sensor
-def getColor():
-    jdata = json.loads(currentColor())
-
-    if jdata['color'] != 'unknown':
-    	print(jdata['color'])
-    	#setColor(color)
-
-    return currentColor()
-
-#thread global variable
-t = perpetualTimer(1,getColor)
-
-#starts thread and returns first color read
-def startReading():
-	global t
-	if t.isRunning() is not True:
-		t.start()
-
-	return getColor()
-
-#stops the thread
-def stopReading():
-	global t
-	t.cancel()
-	t = perpetualTimer(1,getColor)
-	return "Not reading colors"
-
-#send a post request to set color
-def setColor(color):
-	r = requests.post(urlSetColor, json={"color": color})
-	print(r.status_code, r.reason)
 
 #sets a name for color in a range
 def colorNameFromHsv(h,s,v):
@@ -58,10 +26,10 @@ def colorNameFromHsv(h,s,v):
 	return colorName
 
 def currentColor():
-    #r, g, b = color_sensor.colorSensor()
-    r = 1024
-    g = 0
-    b = 0
+    r, g, b = color_sensor.sense_colors()
+    # r = 1024
+    # g = 0
+    # b = 0
 
     h, s, v = colorsys.rgb_to_hsv(r/1024., g/1024., b/1024.)
     h = h * 360
@@ -76,3 +44,38 @@ def currentColor():
     json_data = json.dumps(data)
 
     return json_data
+
+#read sensor
+def getColor():
+    json_color = currentColor()
+    jdata = json.loads(json_color)
+
+    if jdata['color'] != 'unknown':
+    	print(jdata['color'])
+    	setColor(color)
+
+    return json_color
+
+#thread global variable
+t = perpetualTimer(1,getColor)
+
+#starts thread and returns first color read
+def startReading():
+	global t
+
+	h = threading.Thread(target=t.run)
+	t.start()
+	h.start()
+
+	return "Reading colors"
+
+#stops the thread
+def stopReading():
+	global t
+	t.stop()
+	return "Not reading colors"
+
+#send a post request to set color
+def setColor(color):
+	r = requests.post(urlSetColor, json={"color": color})
+	print(r.status_code, r.reason)
