@@ -17,12 +17,14 @@ var users;
 
 var tryToConnect = function() {
   if (botToken) {
-    rtm = new RtmClient(botToken);
+    rtm = new RtmClient(botToken, {
+      dataStore: false,
+    });
 
     rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (rtmStartData) => {
       users = rtmStartData.users;
-      for (var c of rtmStartData.groups) {
-        if (c.name ==='lot40') {
+      for (var c of rtmStartData.channels) {
+        if (c.name ==='chaos-bot-cr') {
           channel = c.id;
         }
       }
@@ -39,14 +41,18 @@ var tryToConnect = function() {
       rtm.sendMessage("RaspberryPi car initialized", channel);
     });
 
-    rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
-      winston.log(message);
+    rtm.on('message', (message) => {
+      // Log the message and skip messages from bot
+      if(!message.bot_id){
+        winston.info(`(channel:${message.channel}) ${message.user} says: ${message.text}`);
+      }
 
       if (message.text) {
-
-        //Send commands to an pi board
-        if (message.text.toLowerCase().startsWith('pi ')) {
-          pi.raspberry(message, web);
+        //Send commands to pi board
+        if (message.text.toLowerCase().startsWith('pi add ')) {
+          pi.users(message, web, users);
+        } else if (message.text.toLowerCase().startsWith('pi ')) {
+          pi.navigation(message, web);
         }
       }
     });

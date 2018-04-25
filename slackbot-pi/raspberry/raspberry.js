@@ -1,7 +1,9 @@
 const request = require('request');
 const Components = require('../models/components');
 const Users = require('../models/users');
-const navigateUrl = 'http://10.28.6.22:8080/navigate';
+const env = require('../.env.json');
+const navigateUrl = 'http://'+env.goServerIp+'/navigate';
+const winston = require('winston');
 
 let opts = {
  'as_user': true,
@@ -14,18 +16,48 @@ let component = {
 };
 
 module.exports = {
-  raspberry: async (message, web) => {
+  users: (message, web, users) => {
+    let command = message.text.replace('pi ', '');
+    let params = command.split(' ');
+    let user;
+
+    for (var u of users) {
+      if (u.name === params[1]) {
+        user = u;
+      }
+    }
+
+    if (params[0] == 'add') {
+      if (params.length > 2) {
+
+        let userId = user.id;
+        let direction = params[2];
+
+        addUser({
+          botId : userId,
+          direction : direction,
+        });
+        web.chat.postMessage(message.channel, 'User added in DB', opts);
+        return
+
+      } else {
+        web.chat.postMessage(message.channel, 'Not enough parameters', opts);
+        return
+      }
+    }
+  },
+  navigation: async (message, web) => {
     let command = message.text.replace('pi ', '');
     let params = command.split(' ');
 
-    console.log(params)     
+    winston.info('params: ' + params);   
 
     if (params[0] == "delete") {
       if (params.length > 1) {
 
         let userId = params[1].replace(/[^a-zA-Z0-9 ]/g, "")
 
-        console.log(userId);
+        winston.info('user id: ' + userId);
 
         web.chat.postMessage(message.channel, 'hello', opts);
         deleteUser({
@@ -39,43 +71,26 @@ module.exports = {
       }
     }
 
-    if (params[0] == 'add') {
-
-      if (params.length > 2) {
-
-        let userId = params[1].replace(/[^a-zA-Z0-9 ]/g, "");
-        let direction = params[2];
-
-        console.log(userId);
-
-        web.chat.postMessage(message.channel, 'hello', opts);
-        addUser({
-          botId : userId,
-          direction : direction,
-        });
-        return
-
-      } else {
-        web.chat.postMessage(message.channel, 'Not enough parameters', opts);
-        return
-      }
-    }
-
     if(params[0] == 'come' && params[1] == 'here'){
       //Car should go to user's location
       let user = await findUser({"botId": message.user});
-
+      
       // Configure the request
       var options = {
         uri:     navigateUrl,
         method:  'POST',
-        json: {'color': user.direction}
-      }
+        json: {
+          'color': user.direction
+        }
+      };
 
       // Start the request
-      request(options, function (error, response, body) {
+      request(options, function (error, response, body) {        
         if (!error && response.statusCode == 200) {
           web.chat.postMessage(message.channel, 'Going to your desk', opts);
+        } else {
+          winston.info('error: ' + error);
+          web.chat.postMessage(message.channel, 'Unfortunately I cant communicate with RaspiCar', opts);
         }
       })
       

@@ -5,7 +5,7 @@ var webserver = require('./webserver');
 var updates = require('./updates');
 var mongoose = require('mongoose');
 
-mongoose.connect('mongodb://10.28.6.16/raspiBot');
+mongoose.connection.openUri('mongodb://raspibot:raspibot1@ds257589.mlab.com:57589/raspibot')
 
 winston.add(winston.transports.File, {filename: 'log/chaos.log'});
 
